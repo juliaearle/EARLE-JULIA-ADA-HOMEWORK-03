@@ -1,0 +1,100 @@
+---
+title: "Homework-03"
+output: html_document
+---
+```{R}
+#Problem 1
+z.prop.test <- function(mu0, muA, sigma, n, p1, n1, p2 = NULL, n2 = NULL, p0, conf.level = 0.95, alternative = "two.sided"){
+p <- rep(NA, k)
+for (i in 1:k) {
+ci <- c(m - qt(1 - alpha/2, df = n - 1) * sem, Inf)
+z <- (m - mu0)/(s/sqrt(n))
+t <- (m-mu0)/(s/sqrt(n))}
+if (alternative=="less"){
+  p1 > p2
+  }
+  else if (alternative=="greater"){
+  p1 < p2
+  }
+
+  if (p2=="NULL" || n2=="NULL"){correct = FALSE
+  p1
+  }
+  return(propList)
+}
+```
+```{R}
+#Problem 2
+library("readr")
+library("tidyverse")
+f <- "https://raw.githubusercontent.com/difiore/ADA-2019/master/KamilarAndCooperData.csv"
+d <- read_csv(f, col_names = TRUE)
+d
+```
+```{R}
+library("ggplot2")
+library("gridExtra")
+library("manipulate")
+library("lmodel2")
+m <- lm(formula = MaxLongevity_m ~ Brain_Size_Species_Mean, data = d)
+m
+summary(m)
+```
+```{R}
+g <- ggplot(data = d, aes(x = d$MaxLongevity_m, y = d$Brain_Size_Species_Mean)) + geom_point() + geom_smooth(method = "lm", formula = y ~ x)
+g
+```
+```{R}
+lb <- lm(data = d, log(MaxLongevity_m)~log(Brain_Size_Species_Mean))
+summary(lb)
+```
+```{R}
+g <- ggplot(data = d, aes(x = log(d$MaxLongevity_m), y = log(d$Brain_Size_Species_Mean))) + geom_point() + geom_smooth(method = "lm", formula = y ~ x)
+g
+```
+```{R}
+library(lmodel2)
+#CI from log is 0.0097
+alpha <- 0.0097
+lbCI <- confint(m, level = 0.90 - alpha)
+attributes(lbCI)
+```
+```{R}
+mII <- lmodel2(MaxLongevity_m ~ Brain_Size_Species_Mean, data = d, range.y = "relative", range.x = "relative", 
+    nperm = 1000)
+mII
+```
+```{R}
+library(dplyr)
+filter(mII$regression.results, Method == "OLS")
+```
+```{R}
+beta1 <- cor(d$MaxLongevity_m, d$Brain_Size_Species_Mean, use = "complete.obs") * sd(d$MaxLongevity_m, na.rm = TRUE)/sd(d$Brain_Size_Species_Mean, na.rm = TRUE)
+beta1
+```
+```{R}
+beta0 <- mean(d$MaxLongevity_m, na.rm = TRUE) - beta1 * mean(d$Brain_Size_Species_Mean, na.rm = TRUE)
+beta0
+```
+
+```{R}
+pi <- predict(m, interval = "prediction", level = 0.90)
+ci <- predict(m, interval = "confidence", level = 0.90)
+m <- lm(d$MaxLongevity_m ~ d$Brain_Size_Species_Mean)
+plot(d$MaxLongevity_m ~ d$Brain_Size_Species_Mean)
+lines(ci[, 1], col = "black")
+lines(ci[, 2], col = "blue")
+lines(ci[, 3], col = "blue")
+lines(pi[, 2], col = "red")
+lines(pi[, 3], col = "red")
+#Couldn't get the legend to show up...
+```
+```{R}
+bl.lm = lm(d$Brain_Size_Species_Mean ~ d$MaxLongevity_m)
+newdata = data.frame(Brain_Size_Species_Mean = 800)
+pe <- predict.lm(bl.lm, newdata, interval = "predict", level = 0.90)
+pe
+```
+```{R}
+#I do not trust the results of this last model because the values would be skewed, since a brain of 800 mg is an outlier of the data, and is not representative of the overall range. I think the original model is better because it takes the full range of data into account.
+```
